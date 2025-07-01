@@ -3,47 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Worfe Hack</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
+  <title>IP Sorgu | Efe Köse</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      color: #f8f9fa;
+    }
+    .modern-card {
+      background: #23272b;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 2.5rem 2rem 2rem 2rem;
+      margin-top: 3rem;
+    }
+    .modern-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      color: #00d2ff;
+      text-shadow: 0 2px 8px rgba(0,210,255,0.1);
+    }
+    .modern-desc {
+      color: #b0b3b8;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .input-group-text, .form-control, .btn-primary {
+      border-radius: 0.75rem;
+      font-size: 1.1rem;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      border: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
+    }
+    #loader {
+      display: none;
+    }
+    .result-table {
+      background: #181a1b;
+      color: #fff;
+      border-radius: 1rem;
+      margin-top: 1.5rem;
+      overflow: hidden;
+    }
+    .result-table th, .result-table td {
+      border: none;
+      padding: 0.75rem 1rem;
+    }
+    .result-table th {
+      background: #23272b;
+      color: #00d2ff;
+      font-weight: 600;
+      width: 35%;
+    }
+    .result-table tr:not(:last-child) td, .result-table tr:not(:last-child) th {
+      border-bottom: 1px solid #343a40;
+    }
+    .social-icons a {
+      color: #00d2ff;
+      font-size: 2rem;
+      margin-right: 1.2rem;
+      transition: color 0.2s;
+    }
+    .social-icons a:last-child {
+      margin-right: 0;
+    }
+    .social-icons a:hover {
+      color: #3a7bd5;
+    }
+    @media (max-width: 576px) {
+      .modern-card {
+        padding: 1.2rem 0.5rem;
+      }
+      .modern-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
   <script>
     function sorgula() {
-      var ipAdresi = document.getElementById('ipAdresi').value;
-
+      var ipAdresi = document.getElementById('ipAdresi').value.trim();
+      var sonuc = document.getElementById('sonuc');
+      var loader = document.getElementById('loader');
+      sonuc.innerHTML = '';
+      if (!ipAdresi) {
+        sonuc.innerHTML = '<div class="alert alert-warning mt-3">Lütfen bir IP adresi girin.</div>';
+        return;
+      }
+      loader.style.display = 'inline-block';
       fetch(`https://ipapi.co/${ipAdresi}/json/`)
         .then(response => response.json())
         .then(data => {
-          document.getElementById('sonuc').innerHTML = JSON.stringify(data, null, 2);
+          loader.style.display = 'none';
+          if (data.error) {
+            sonuc.innerHTML = `<div class='alert alert-danger mt-3'>Hata: ${data.reason || 'Geçersiz IP adresi veya sorgu limiti.'}</div>`;
+            return;
+          }
+          let table = `<table class='table result-table'><tbody>`;
+          for (const [key, value] of Object.entries(data)) {
+            table += `<tr><th>${key}</th><td>${value}</td></tr>`;
+          }
+          table += `</tbody></table>`;
+          sonuc.innerHTML = table;
         })
-        .catch(error => console.error('IP sorgusu yapılamadı', error));
+        .catch(error => {
+          loader.style.display = 'none';
+          sonuc.innerHTML = `<div class='alert alert-danger mt-3'>IP sorgusu yapılamadı: ${error}</div>`;
+        });
+    }
+    function inputKeyPress(e) {
+      if (e.key === 'Enter') sorgula();
     }
   </script>
 </head>
 <body>
-  
-
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-  <h1>İp Sorgu Efe Köse</h1>
-  
-  <label for="ipAdresi">IP Adresi:</label>
-  <input type="text" id="ipAdresi" placeholder="Örn: 8.8.8.8">
-  
-  <button onclick="sorgula()">Sorgula</button>
-  
-  <pre id="sonuc"></pre>
-  <div class="card text-bg-dark">
-    <img src="babaringo.png" class="card-img" alt="...">
-    <div class="card-img-overlay">
-      <h5 class="card-title">Bizimle İletişime Geç</h5>
-      <div class="btn-group">
-        <a href="https://www.instagram.com/2fe.kk?igsh=MzNlNGNkZWQ4Mg==" class="btn btn-primary active" aria-current="page">İnstagram</a>
-        <a href="https://discord.gg/WorfeHack" class="btn btn-primary">Discord</a>
-        <a href="https://t.me/WorfeHack1" class="btn btn-primary">Telegram</a>
+  <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <div class="modern-card w-100" style="max-width: 540px;">
+      <div class="text-center mb-4">
+        <i class="fa-solid fa-globe fa-3x mb-3" style="color:#00d2ff;"></i>
+        <div class="modern-title">IP Sorgu</div>
+        <div class="modern-desc">IP adresi girerek detaylı konum ve ağ bilgilerini anında öğrenin.</div>
       </div>
-      <p class="card-text"><small>Daha fazlasi için Discord Ve Telegram kanallarimiza gelin</small></p>
+      <div class="input-group mb-3">
+        <span class="input-group-text"><i class="fa-solid fa-network-wired"></i></span>
+        <input type="text" id="ipAdresi" class="form-control" placeholder="Örn: 8.8.8.8" onkeypress="inputKeyPress(event)">
+        <button class="btn btn-primary" onclick="sorgula()">Sorgula</button>
+      </div>
+      <div class="text-center mb-2">
+        <span id="loader" class="spinner-border text-info" role="status"></span>
+      </div>
+      <div id="sonuc"></div>
+      <div class="text-center mt-4">
+        <div class="social-icons">
+          <a href="https://www.instagram.com/efekkosee" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p class="modern-desc mt-3 mb-0"><small>İletişim için sadece Instagram: <b>@efekkosee</b></small></p>
+      </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
